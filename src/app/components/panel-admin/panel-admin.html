@@ -1,0 +1,49 @@
+<section class="dashboard">
+  <div class="kpis" *ngIf="state.dashboard() as stats">
+    <article class="kpi">
+      <span>Disciplinas activas</span>
+      <strong>{{ stats.activeDisciplines }}</strong>
+    </article>
+    <article class="kpi">
+      <span>Maestros activos</span>
+      <strong>{{ stats.activeTeachers }}</strong>
+    </article>
+    <article class="kpi">
+      <span>Horarios activos</span>
+      <strong>{{ stats.activeSchedules }}</strong>
+    </article>
+    <article class="kpi">
+      <span>Alumnos activos</span>
+      <strong>{{ stats.activeStudents }}</strong>
+    </article>
+    <article class="kpi">
+      <span>Inscripciones</span>
+      <strong>{{ stats.activeEnrollments }}</strong>
+    </article>
+    <article class="kpi">
+      <span>Asistencia general</span>
+      <strong>{{ stats.attendancePercentage }}%</strong>
+    </article>
+  </div>
+
+  <section class="grid two">
+    <article class="panel">
+      <h3>Resumen de asistencias</h3>
+      <div class="metrics" *ngIf="state.dashboard() as stats">
+        <span><strong>{{ stats.totalAttendanceRecords }}</strong> registros</span>
+        <span><strong>{{ stats.presentRecords }}</strong> presentes</span>
+        <span><strong>{{ stats.lateRecords }}</strong> retardos</span>
+        <span><strong>{{ stats.absentRecords }}</strong> faltas</span>
+        <span><strong>{{ stats.justifiedRecords }}</strong> justificadas</span>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h3>Ocupacion por horario</h3>
+      <div class="item" *ngFor="let schedule of state.schedules()">
+        <span>{{ schedule.name }} <small>{{ schedule.discipline.name }} / {{ schedule.teacher.name }}</small></span>
+        <strong>{{ state.enrollmentCountForSchedule(schedule.id) }}/{{ schedule.capacity }}</strong>
+      </div>
+    </article>
+  </section>
+</section>

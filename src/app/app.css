@@ -1,9 +1,9 @@
-:host {
+app-root {
   display: block;
   min-height: 100dvh;
   color: #17211b;
   background: #eef3f0;
-  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
 }
 
@@ -13,8 +13,39 @@
 
 .shell {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 1fr;
   min-height: 100dvh;
+}
+
+app-menu-lateral {
+  display: block;
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 30;
+  width: min(292px, 86vw);
+  min-width: 0;
+  transform: translateX(-100%);
+  transition: transform 180ms ease;
+}
+
+.shell.sidebar-open app-menu-lateral {
+  transform: translateX(0);
+}
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: rgba(9, 24, 20, 0.38);
+}
+
+.shell.sidebar-open .sidebar-backdrop {
+  display: block;
 }
 
 .login-screen {
@@ -25,6 +56,7 @@
 }
 
 .login-box {
+  justify-items: stretch;
   display: grid;
   gap: 14px;
   width: min(100%, 360px);
@@ -34,35 +66,70 @@
   background: #ffffff;
 }
 
+.login-logo {
+  justify-self: center;
+  width: min(170px, 70%);
+  height: auto;
+  margin-bottom: 2px;
+}
+
 .login-box label {
   display: grid;
   gap: 6px;
   color: #52635b;
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .login-error {
   color: #8b2525;
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 28px;
+  height: 100%;
+  min-height: 100dvh;
   padding: 28px;
   color: #f8fbf9;
   background: #183c32;
+  box-shadow: 18px 0 40px rgba(9, 24, 20, 0.22);
+  overflow: hidden;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.brand img {
+  flex: 0 0 auto;
+  width: 52px;
+  height: auto;
+}
+
+.brand-copy {
+  min-width: 0;
+  transition: opacity 160ms ease;
+}
+
+.sidebar-close {
+  width: 100%;
+  color: #183c32;
+  background: #eaf3ef;
 }
 
 .eyebrow {
   margin: 0 0 8px;
   color: #7ab8a1;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -73,6 +140,7 @@ h3 {
   margin: 0;
   letter-spacing: 0;
   overflow-wrap: anywhere;
+  font-weight: 600;
 }
 
 h1 {
@@ -100,7 +168,7 @@ button {
   padding: 8px 12px;
   color: #183c32;
   background: #ffffff;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -112,6 +180,8 @@ button.active {
 }
 
 nav button {
+  display: flex;
+  align-items: center;
   justify-content: flex-start;
   width: 100%;
   color: #eaf3ef;
@@ -128,6 +198,7 @@ nav button {
 }
 
 .workspace {
+  position: relative;
   padding: 28px;
   overflow: auto;
 }
@@ -135,9 +206,23 @@ nav button {
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 16px;
   margin-bottom: 22px;
+}
+
+.menu-button {
+  flex: 0 0 44px;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.top-title {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .top-actions {
@@ -155,10 +240,29 @@ nav button {
 }
 
 .panel {
+  position: relative;
+  overflow: hidden;
   padding: 20px;
   border: 1px solid #dbe6e0;
   border-radius: 8px;
   background: #ffffff;
+}
+
+.panel::after,
+.kpi::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: url("/clublago-removebg-preview.png") center / min(260px, 58%) no-repeat;
+  opacity: 0.045;
+}
+
+.panel > *,
+.kpi > * {
+  position: relative;
+  z-index: 1;
 }
 
 .dashboard {
@@ -173,6 +277,8 @@ nav button {
 }
 
 .kpi {
+  position: relative;
+  overflow: hidden;
   display: grid;
   gap: 8px;
   min-height: 104px;
@@ -185,13 +291,14 @@ nav button {
 .kpi span {
   color: #52635b;
   font-size: 0.82rem;
-  font-weight: 900;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
 .kpi strong {
   color: #183c32;
   font-size: 2rem;
+  font-weight: 600;
   line-height: 1;
 }
 
@@ -236,7 +343,7 @@ select {
   min-width: 220px;
   color: #52635b;
   font-size: 0.88rem;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .capacity {
@@ -244,7 +351,7 @@ select {
   border-radius: 8px;
   color: #19523f;
   background: #e8f4ef;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .checks {
@@ -314,7 +421,7 @@ select {
   color: #52635b;
   background: #f5f8f6;
   font-size: 0.82rem;
-  font-weight: 900;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
@@ -359,17 +466,16 @@ select {
   }
 
   .sidebar {
-    position: static;
     gap: 18px;
     padding: 20px;
   }
 
   nav {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: 1fr;
   }
 
   nav button {
-    text-align: center;
+    text-align: left;
   }
 
   .workspace {
@@ -411,16 +517,12 @@ select {
   }
 
   nav {
-    display: flex;
+    display: grid;
     gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    scrollbar-width: thin;
   }
 
   nav button {
-    flex: 0 0 auto;
-    width: auto;
+    width: 100%;
     white-space: nowrap;
   }
 
@@ -429,8 +531,9 @@ select {
   }
 
   .topbar {
-    align-items: stretch;
-    flex-direction: column;
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 16px;
   }
@@ -438,6 +541,7 @@ select {
   .top-actions {
     align-items: stretch;
     flex-direction: column;
+    width: 100%;
   }
 
   .top-actions button,
@@ -538,7 +642,7 @@ select {
     margin-bottom: 3px;
     color: #687970;
     font-size: 0.7rem;
-    font-weight: 900;
+    font-weight: 600;
     text-transform: uppercase;
   }
 

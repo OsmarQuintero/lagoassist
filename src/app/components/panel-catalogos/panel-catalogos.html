@@ -1,0 +1,54 @@
+<section class="grid">
+  <article class="panel">
+    <h3>Disciplinas</h3>
+    <form (ngSubmit)="state.saveDiscipline()" class="form">
+      <input name="disciplineName" [(ngModel)]="state.disciplineForm.name" placeholder="Nombre" required />
+      <input name="activityType" [(ngModel)]="state.disciplineForm.activityType" placeholder="Tipo de actividad" required />
+      <button>Guardar</button>
+    </form>
+    <div class="item" *ngFor="let item of state.disciplines()">
+      <span>{{ item.name }} <small>{{ item.activityType }}</small></span>
+      <button type="button" (click)="state.deactivate('disciplines', item.id)">Baja</button>
+    </div>
+  </article>
+
+  <article class="panel">
+    <h3>Maestros</h3>
+    <form (ngSubmit)="state.saveTeacher()" class="form">
+      <input name="teacherName" [(ngModel)]="state.teacherForm.name" placeholder="Nombre" required />
+      <input name="teacherPhone" [(ngModel)]="state.teacherForm.phone" placeholder="Telefono" />
+      <input name="teacherEmail" [(ngModel)]="state.teacherForm.email" placeholder="Correo" />
+      <input name="teacherUsername" [(ngModel)]="state.teacherForm.username" placeholder="Usuario" autocomplete="off" required />
+      <input name="teacherPassword" type="password" [(ngModel)]="state.teacherForm.password" placeholder="Contraseña" autocomplete="new-password" required />
+      <div class="checks">
+        <label *ngFor="let discipline of state.disciplines()">
+          <input type="checkbox" [checked]="state.isSelected(state.teacherForm.disciplineIds, discipline.id)" (change)="state.toggleSelection(state.teacherForm.disciplineIds, discipline.id)" />
+          {{ discipline.name }}
+        </label>
+      </div>
+      <button>Guardar</button>
+    </form>
+    <div class="item" *ngFor="let item of state.teachers()">
+      <span>{{ item.name }} <small>{{ item.username }} / {{ item.disciplines[0]?.name }}</small></span>
+      <button type="button" (click)="state.deactivate('teachers', item.id)">Baja</button>
+    </div>
+  </article>
+
+  <article class="panel">
+    <h3>Alumnos</h3>
+    <form (ngSubmit)="state.saveStudent()" class="form">
+      <input name="studentName" [(ngModel)]="state.studentForm.name" placeholder="Nombre" required />
+      <input name="studentActionNumber" [(ngModel)]="state.studentForm.actionNumber" placeholder="Número de acción" required />
+      <input name="studentPhone" [(ngModel)]="state.studentForm.phone" placeholder="Telefono" />
+      <input name="studentEmail" [(ngModel)]="state.studentForm.email" placeholder="Correo" />
+      <select name="studentStatus" [(ngModel)]="state.studentForm.status">
+        <option *ngFor="let status of state.studentStatuses" [ngValue]="status">{{ status }}</option>
+      </select>
+      <button>Guardar</button>
+    </form>
+    <div class="item" *ngFor="let item of state.students()">
+      <span>{{ item.name }} <small>Acción {{ item.actionNumber }} / {{ item.status }}</small></span>
+      <button type="button" (click)="state.deactivate('students', item.id)">Baja</button>
+    </div>
+  </article>
+</section>

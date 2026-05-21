@@ -1,0 +1,38 @@
+<section class="panel">
+  <div class="filters">
+    <label>
+      Horario
+      <select [(ngModel)]="state.attendanceFilters.scheduleId" (change)="state.loadRollCall()">
+        <option *ngFor="let schedule of state.attendanceSchedules()" [ngValue]="schedule.id">
+          {{ schedule.name }} - {{ schedule.startTime }}
+        </option>
+      </select>
+    </label>
+    <label>
+      Fecha
+      <input type="date" [(ngModel)]="state.attendanceFilters.date" (change)="state.loadRollCall()" />
+    </label>
+    <span class="capacity">Cupo {{ state.capacityText() }}</span>
+  </div>
+
+  <div class="table">
+    <div class="row head">
+      <span>Alumno</span>
+      <span>Frecuencia</span>
+      <span>Dias</span>
+      <span>Estado</span>
+      <span>Observaciones</span>
+    </div>
+    <div class="row" *ngFor="let row of state.rollCall()">
+      <strong data-label="Alumno">{{ row.studentName }}</strong>
+      <span data-label="Frecuencia">{{ row.frequencyPerWeek }} por semana</span>
+      <span data-label="Dias">{{ state.formatDays(row.selectedDays) }}</span>
+      <div class="segmented" data-label="Estado">
+        <button *ngFor="let status of state.statuses" [class.active]="row.status === status" (click)="state.saveAttendance(row, status)">
+          {{ status }}
+        </button>
+      </div>
+      <input data-label="Observaciones" [(ngModel)]="row.observations" (blur)="state.saveAttendance(row, row.status)" placeholder="Nota" />
+    </div>
+  </div>
+</section>

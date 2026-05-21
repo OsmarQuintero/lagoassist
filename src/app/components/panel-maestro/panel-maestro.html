@@ -1,0 +1,40 @@
+<section class="dashboard">
+  <p class="eyebrow" *ngIf="state.selectedTeacher() as teacher">{{ teacher.name }}</p>
+
+  <div class="kpis">
+    <article class="kpi">
+      <span>Horarios asignados</span>
+      <strong>{{ state.teacherSchedules().length }}</strong>
+    </article>
+    <article class="kpi">
+      <span>Alumnos inscritos</span>
+      <strong>{{ state.teacherStudentsCount() }}</strong>
+    </article>
+    <article class="kpi">
+      <span>Cupo total</span>
+      <strong>{{ state.teacherCapacity() }}</strong>
+    </article>
+    <article class="kpi">
+      <span>Ocupacion</span>
+      <strong>{{ state.teacherOccupancyPercentage() }}%</strong>
+    </article>
+  </div>
+
+  <section class="grid two">
+    <article class="panel">
+      <h3>Mis horarios</h3>
+      <div class="item" *ngFor="let schedule of state.teacherSchedules()">
+        <span>{{ schedule.name }} <small>{{ schedule.discipline.name }} / {{ state.formatDays(schedule.days) }} / {{ schedule.startTime }}</small></span>
+        <strong>{{ state.enrollmentCountForSchedule(schedule.id) }}/{{ schedule.capacity }}</strong>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h3>Mis alumnos</h3>
+      <div class="item" *ngFor="let enrollment of state.teacherEnrollments()">
+        <span>{{ enrollment.student.name }} <small>{{ enrollment.schedule.name }} / {{ state.formatDays(enrollment.selectedDays) }}</small></span>
+        <strong>{{ enrollment.student.status }}</strong>
+      </div>
+    </article>
+  </section>
+</section>

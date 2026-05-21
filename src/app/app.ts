@@ -1,8 +1,16 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, Inject, OnInit, PLATFORM_ID, computed, signal } from '@angular/core';
+import { Component, Inject, OnInit, PLATFORM_ID, ViewEncapsulation, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+import { MenuLateral } from './components/menu-lateral/menu-lateral';
+import { PanelAdmin } from './components/panel-admin/panel-admin';
+import { PanelAsistencias } from './components/panel-asistencias/panel-asistencias';
+import { PanelCatalogos } from './components/panel-catalogos/panel-catalogos';
+import { PanelInscripciones } from './components/panel-inscripciones/panel-inscripciones';
+import { PanelLogin } from './components/panel-login/panel-login';
+import { PanelMaestro } from './components/panel-maestro/panel-maestro';
+import { PanelReportes } from './components/panel-reportes/panel-reportes';
 import { environment } from '../environments/environment';
 
 type AttendanceStatus = 'PRESENTE' | 'FALTA' | 'RETARDO' | 'JUSTIFICADO';
@@ -96,13 +104,26 @@ const today = new Date().toISOString().slice(0, 10);
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MenuLateral,
+    PanelAdmin,
+    PanelAsistencias,
+    PanelCatalogos,
+    PanelInscripciones,
+    PanelLogin,
+    PanelMaestro,
+    PanelReportes,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css',
+  encapsulation: ViewEncapsulation.None,
 })
 export class App implements OnInit {
   private readonly api = environment.apiUrl;
   private readonly sessionKey = 'lagoassist.session';
+  readonly state = this;
 
   readonly days = [
     { value: 'LUNES', label: 'Lunes' },
@@ -120,6 +141,7 @@ export class App implements OnInit {
   message = signal('');
   isAuthenticated = signal(false);
   currentRole = signal<UserRole>('admin');
+  sidebarOpen = signal(false);
   loginError = signal('');
   disciplines = signal<Discipline[]>([]);
   teachers = signal<Teacher[]>([]);
@@ -399,9 +421,14 @@ export class App implements OnInit {
 
   setTab(tab: string) {
     this.tab.set(tab);
+    this.sidebarOpen.set(false);
     if (tab === 'reportes') {
       this.loadAttendanceReport();
     }
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen.update((open) => !open);
   }
 
   private readSession(): { role: UserRole; teacherId?: number } | null {
