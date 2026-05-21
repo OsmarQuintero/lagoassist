@@ -1,5 +1,30 @@
 # LagoAssist
 
+Modulo de control de asistencias para Club del Lago A.C. Incluye catalogos de disciplinas, maestros,
+horarios y alumnos, inscripciones con frecuencia semanal, pase de lista y reportes basicos.
+
+## Backend
+
+Desde la carpeta `../clublago`:
+
+```bash
+./mvnw spring-boot:run
+```
+
+La API queda en `http://localhost:8080/api` y la consola H2 en `http://localhost:8080/h2-console`.
+
+Datos H2:
+
+```text
+JDBC URL: jdbc:h2:mem:clublago
+User: sa
+Password:
+```
+
+## Frontend
+
+Requiere Node `20.19` o `22.12` como minimo por Angular 21.
+
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.11.
 
 ## Development server
