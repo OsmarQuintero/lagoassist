@@ -17,7 +17,10 @@
         <span>Dashboard</span>
       </button>
       <button type="button" data-short="C" [class.active]="state.tab() === 'catalogos'" (click)="state.setTab('catalogos')">
-        <span>Catalogos</span>
+        <span>Catálogos</span>
+      </button>
+      <button type="button" data-short="A" [class.active]="state.tab() === 'alumnos'" (click)="state.setTab('alumnos')">
+        <span>Alumnos</span>
       </button>
       <button type="button" data-short="I" [class.active]="state.tab() === 'inscripciones'" (click)="state.setTab('inscripciones')">
         <span>Inscripciones</span>
