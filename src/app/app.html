@@ -1,49 +1,14 @@
-<section class="login-screen" *ngIf="!isAuthenticated()">
-  <form class="login-box" (ngSubmit)="login()">
-    <p class="eyebrow">Club del Lago A.C.</p>
-    <h1>LagoAssist</h1>
+<app-panel-login *ngIf="!isAuthenticated()" [state]="state"></app-panel-login>
 
-    <label>
-      Usuario
-      <input name="username" [(ngModel)]="loginForm.username" autocomplete="username" required />
-    </label>
-
-    <label>
-      Contraseña
-      <input name="password" type="password" [(ngModel)]="loginForm.password" autocomplete="current-password" required />
-    </label>
-
-    <button>Entrar</button>
-    <span class="login-error" *ngIf="loginError()">{{ loginError() }}</span>
-  </form>
-</section>
-
-<main class="shell" *ngIf="isAuthenticated()">
-  <aside class="sidebar">
-    <div>
-      <p class="eyebrow">Club del Lago A.C.</p>
-      <h1>LagoAssist</h1>
-    </div>
-
-    <nav>
-      <button [class.active]="tab() === 'asistencias'" (click)="tab.set('asistencias')">Asistencias</button>
-      <button [class.active]="tab() === 'catalogos'" (click)="tab.set('catalogos')">Catalogos</button>
-      <button [class.active]="tab() === 'inscripciones'" (click)="tab.set('inscripciones')">Inscripciones</button>
-      <button [class.active]="tab() === 'reportes'" (click)="tab.set('reportes')">Reportes</button>
-    </nav>
-
-    <section class="summary" *ngIf="dashboard() as stats">
-      <span>{{ stats.activeDisciplines }} disciplinas</span>
-      <span>{{ stats.activeTeachers }} maestros</span>
-      <span>{{ stats.activeStudents }} alumnos</span>
-      <span>{{ stats.activeEnrollments }} inscripciones</span>
-    </section>
-  </aside>
+<main class="shell" [class.sidebar-open]="currentRole() === 'admin' && sidebarOpen()" *ngIf="isAuthenticated()">
+  <app-menu-lateral *ngIf="currentRole() === 'admin'" [state]="state"></app-menu-lateral>
+  <button *ngIf="currentRole() === 'admin'" class="sidebar-backdrop" type="button" aria-label="Cerrar menu" (click)="toggleSidebar()"></button>
 
   <section class="workspace">
     <header class="topbar">
-      <div>
-        <p class="eyebrow">Modulo de control</p>
+      <button *ngIf="currentRole() === 'admin'" class="menu-button" type="button" aria-label="Abrir menu" (click)="toggleSidebar()">☰</button>
+      <div class="top-title">
+        <p class="eyebrow">{{ currentRole() === 'admin' ? 'Panel administrativo' : 'Panel de maestros' }}</p>
         <h2>{{ tab() | titlecase }}</h2>
       </div>
       <div class="top-actions">
@@ -52,189 +17,11 @@
       </div>
     </header>
 
-    <section *ngIf="tab() === 'asistencias'" class="panel">
-      <div class="filters">
-        <label>
-          Horario
-          <select [(ngModel)]="attendanceFilters.scheduleId" (change)="loadRollCall()">
-            <option *ngFor="let schedule of schedules()" [ngValue]="schedule.id">
-              {{ schedule.name }} - {{ schedule.startTime }}
-            </option>
-          </select>
-        </label>
-        <label>
-          Fecha
-          <input type="date" [(ngModel)]="attendanceFilters.date" (change)="loadRollCall()" />
-        </label>
-        <span class="capacity">Cupo {{ capacityText() }}</span>
-      </div>
-
-      <div class="table">
-        <div class="row head">
-          <span>Alumno</span>
-          <span>Frecuencia</span>
-          <span>Dias</span>
-          <span>Estado</span>
-          <span>Observaciones</span>
-        </div>
-        <div class="row" *ngFor="let row of rollCall()">
-          <strong>{{ row.studentName }}</strong>
-          <span>{{ row.frequencyPerWeek }} por semana</span>
-          <span>{{ row.selectedDays.join(', ') }}</span>
-          <div class="segmented">
-            <button *ngFor="let status of statuses" [class.active]="row.status === status" (click)="saveAttendance(row, status)">
-              {{ status }}
-            </button>
-          </div>
-          <input [(ngModel)]="row.observations" (blur)="saveAttendance(row, row.status)" placeholder="Nota" />
-        </div>
-      </div>
-    </section>
-
-    <section *ngIf="tab() === 'catalogos'" class="grid">
-      <article class="panel">
-        <h3>Disciplinas</h3>
-        <form (ngSubmit)="saveDiscipline()" class="form">
-          <input name="disciplineName" [(ngModel)]="disciplineForm.name" placeholder="Nombre" required />
-          <input name="activityType" [(ngModel)]="disciplineForm.activityType" placeholder="Tipo de actividad" required />
-          <button>Guardar</button>
-        </form>
-        <div class="item" *ngFor="let item of disciplines()">
-          <span>{{ item.name }} <small>{{ item.activityType }}</small></span>
-          <button (click)="deactivate('disciplines', item.id)">Baja</button>
-        </div>
-      </article>
-
-      <article class="panel">
-        <h3>Maestros</h3>
-        <form (ngSubmit)="saveTeacher()" class="form">
-          <input name="teacherName" [(ngModel)]="teacherForm.name" placeholder="Nombre" required />
-          <input name="teacherPhone" [(ngModel)]="teacherForm.phone" placeholder="Telefono" />
-          <input name="teacherEmail" [(ngModel)]="teacherForm.email" placeholder="Correo" />
-          <div class="checks">
-            <label *ngFor="let discipline of disciplines()">
-              <input type="checkbox" [checked]="isSelected(teacherForm.disciplineIds, discipline.id)" (change)="toggleSelection(teacherForm.disciplineIds, discipline.id)" />
-              {{ discipline.name }}
-            </label>
-          </div>
-          <button>Guardar</button>
-        </form>
-        <div class="item" *ngFor="let item of teachers()">
-          <span>{{ item.name }} <small>{{ item.disciplines[0]?.name }}</small></span>
-          <button (click)="deactivate('teachers', item.id)">Baja</button>
-        </div>
-      </article>
-
-      <article class="panel">
-        <h3>Alumnos</h3>
-        <form (ngSubmit)="saveStudent()" class="form">
-          <input name="studentName" [(ngModel)]="studentForm.name" placeholder="Nombre" required />
-          <input name="numeroaccion" [(ngModel)]="studentForm.numeroAccion" placeholder="Numero de accion" />
-          <input name="studentPhone" [(ngModel)]="studentForm.phone" placeholder="Telefono" />
-          <input name="studentEmail" [(ngModel)]="studentForm.email" placeholder="Correo" />
-          <select name="studentStatus" [(ngModel)]="studentForm.status">
-            <option *ngFor="let status of studentStatuses" [ngValue]="status">{{ status }}</option>
-          </select>
-          <button>Guardar</button>
-        </form>
-        <div class="item" *ngFor="let item of students()">
-          <span>{{ item.name }} <small>{{ item.status }}</small></span>
-          <button (click)="deactivate('students', item.id)">Baja</button>
-        </div>
-      </article>
-    </section>
-
-    <section *ngIf="tab() === 'inscripciones'" class="grid two">
-      <article class="panel">
-        <h3>Horarios</h3>
-        <form (ngSubmit)="saveSchedule()" class="form">
-          <input name="scheduleName" [(ngModel)]="scheduleForm.name" placeholder="Nombre del horario" required />
-          <select name="disciplineId" [(ngModel)]="scheduleForm.disciplineId">
-            <option *ngFor="let discipline of disciplines()" [ngValue]="discipline.id">{{ discipline.name }}</option>
-          </select>
-          <select name="teacherId" [(ngModel)]="scheduleForm.teacherId">
-            <option *ngFor="let teacher of teachers()" [ngValue]="teacher.id">{{ teacher.name }}</option>
-          </select>
-          <div class="inline">
-            <input name="startTime" type="time" [(ngModel)]="scheduleForm.startTime" />
-            <input name="endTime" type="time" [(ngModel)]="scheduleForm.endTime" />
-            <input name="capacity" type="number" min="1" [(ngModel)]="scheduleForm.capacity" />
-          </div>
-          <div class="checks">
-            <label *ngFor="let day of days">
-              <input type="checkbox" [checked]="isSelected(scheduleForm.days, day.value)" (change)="toggleSelection(scheduleForm.days, day.value)" />
-              {{ day.label }}
-            </label>
-          </div>
-          <button>Guardar</button>
-        </form>
-        <div class="item" *ngFor="let item of schedules()">
-          <span>{{ item.name }} <small>{{ item.discipline.name }} / {{ item.teacher.name }}</small></span>
-          <button (click)="deactivate('schedules', item.id)">Baja</button>
-        </div>
-      </article>
-
-      <article class="panel">
-        <h3>Inscribir alumnos</h3>
-        <form (ngSubmit)="saveEnrollment()" class="form">
-          <select name="enrollmentStudent" [(ngModel)]="enrollmentForm.studentId">
-            <option *ngFor="let student of students()" [ngValue]="student.id">{{ student.name }}</option>
-          </select>
-          <select name="enrollmentSchedule" [(ngModel)]="enrollmentForm.scheduleId">
-            <option *ngFor="let schedule of schedules()" [ngValue]="schedule.id">{{ schedule.name }}</option>
-          </select>
-          <input name="frequency" type="number" min="1" max="7" [(ngModel)]="enrollmentForm.frequencyPerWeek" />
-          <div class="checks">
-            <label *ngFor="let day of days">
-              <input type="checkbox" [checked]="isSelected(enrollmentForm.selectedDays, day.value)" (change)="toggleSelection(enrollmentForm.selectedDays, day.value)" />
-              {{ day.label }}
-            </label>
-          </div>
-          <button>Guardar</button>
-        </form>
-        <div class="item" *ngFor="let item of enrollments()">
-          <span>{{ item.student.name }} <small>{{ item.schedule.name }} / {{ item.frequencyPerWeek }} dias</small></span>
-          <button (click)="deactivate('enrollments', item.id)">Baja</button>
-        </div>
-      </article>
-    </section>
-
-    <section *ngIf="tab() === 'reportes'" class="panel">
-      <div class="filters">
-        <label>
-          Agrupar por
-          <select [(ngModel)]="reportGroup" (change)="loadAttendanceReport()">
-            <option value="discipline">Disciplina</option>
-            <option value="teacher">Maestro</option>
-            <option value="schedule">Horario</option>
-            <option value="student">Alumno</option>
-          </select>
-        </label>
-      </div>
-      <div class="metrics" *ngIf="dashboard() as stats">
-        <span><strong>{{ stats.presentRecords }}</strong> asistencias</span>
-        <span><strong>{{ stats.absentRecords }}</strong> faltas</span>
-      </div>
-      <div class="table report">
-        <div class="row head">
-          <span>Grupo</span>
-          <span>Total</span>
-          <span>Presente</span>
-          <span>Retardo</span>
-          <span>Falta</span>
-          <span>Just.</span>
-          <span>%</span>
-        </div>
-        <div class="row" *ngFor="let row of reportRows()">
-          <strong>{{ row.label }}</strong>
-          <span>{{ row.total }}</span>
-          <span>{{ row.present }}</span>
-          <span>{{ row.late }}</span>
-          <span>{{ row.absent }}</span>
-          <span>{{ row.justified }}</span>
-          <span>{{ row.attendancePercentage }}%</span>
-        </div>
-      </div>
-    </section>
+    <app-panel-admin *ngIf="tab() === 'dashboard-admin'" [state]="state"></app-panel-admin>
+    <app-panel-maestro *ngIf="tab() === 'dashboard-teacher'" [state]="state"></app-panel-maestro>
+    <app-panel-catalogos *ngIf="tab() === 'catalogos'" [state]="state"></app-panel-catalogos>
+    <app-panel-alumnos *ngIf="tab() === 'alumnos'" [state]="state"></app-panel-alumnos>
+    <app-panel-inscripciones *ngIf="tab() === 'inscripciones'" [state]="state"></app-panel-inscripciones>
+    <app-panel-reportes *ngIf="tab() === 'reportes'" [state]="state"></app-panel-reportes>
   </section>
 </main>
