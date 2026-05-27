@@ -3,10 +3,10 @@ import { Component, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-panel-asistencias',
+  selector: 'app-panel-alumnos',
   imports: [CommonModule, FormsModule],
-  templateUrl: './panel-asistencias.html',
+  templateUrl: './panel-alumnos.html',
 })
-export class PanelAsistencias {
+export class PanelAlumnos {
   @Input({ required: true }) state!: any;
 }

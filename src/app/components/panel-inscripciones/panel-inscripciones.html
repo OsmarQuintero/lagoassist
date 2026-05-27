@@ -1,8 +1,8 @@
-<section class="grid two">
+<section class="grid single">
   <article class="panel">
-    <h3>Horarios</h3>
+    <h3>Clases y horarios</h3>
     <form (ngSubmit)="state.saveSchedule()" class="form">
-      <input name="scheduleName" [(ngModel)]="state.scheduleForm.name" placeholder="Nombre del horario" required />
+      <input name="scheduleName" [(ngModel)]="state.scheduleForm.name" placeholder="Nombre de la clase" required />
       <select name="disciplineId" [(ngModel)]="state.scheduleForm.disciplineId">
         <option *ngFor="let discipline of state.disciplines()" [ngValue]="discipline.id">{{ discipline.name }}</option>
       </select>
@@ -20,35 +20,29 @@
           {{ day.label }}
         </label>
       </div>
-      <button>Guardar</button>
+      <button>{{ state.editingScheduleId() ? 'Actualizar' : 'Guardar' }}</button>
+      <button type="button" *ngIf="state.editingScheduleId()" (click)="state.cancelScheduleEdit()">Cancelar</button>
     </form>
     <div class="item" *ngFor="let item of state.schedules()">
-      <span>{{ item.name }} <small>{{ item.discipline.name }} / {{ item.teacher.name }}</small></span>
-      <button type="button" (click)="state.deactivate('schedules', item.id)">Baja</button>
-    </div>
-  </article>
+      <span>
+        {{ item.name }}
+        <small>
+          {{ item.discipline.name }} / {{ item.teacher.name }} / {{ state.formatDays(item.days) }} /
+          {{ item.startTime }}-{{ item.endTime }} / Cupo {{ state.enrollmentCountForSchedule(item.id) }}/{{ item.capacity }} /
+          {{ item.active ? 'ACTIVO' : 'BAJA' }}
+        </small>
+      </span>
 
-  <article class="panel">
-    <h3>Inscribir alumnos</h3>
-    <form (ngSubmit)="state.saveEnrollment()" class="form">
-      <select name="enrollmentStudent" [(ngModel)]="state.enrollmentForm.studentId">
-        <option *ngFor="let student of state.students()" [ngValue]="student.id">{{ student.name }}</option>
-      </select>
-      <select name="enrollmentSchedule" [(ngModel)]="state.enrollmentForm.scheduleId">
-        <option *ngFor="let schedule of state.schedules()" [ngValue]="schedule.id">{{ schedule.name }}</option>
-      </select>
-      <input name="frequency" type="number" min="1" max="7" [(ngModel)]="state.enrollmentForm.frequencyPerWeek" />
-      <div class="checks">
-        <label *ngFor="let day of state.days">
-          <input type="checkbox" [checked]="state.isSelected(state.enrollmentForm.selectedDays, day.value)" (change)="state.toggleSelection(state.enrollmentForm.selectedDays, day.value)" />
-          {{ day.label }}
-        </label>
+      <div class="item-actions">
+        <button type="button" (click)="state.editSchedule(item)">Editar</button>
+        <button
+          type="button"
+          [class.restore]="!item.active"
+          (click)="item.active ? state.deactivate('schedules', item.id) : state.reactivate('schedules', item.id)"
+        >
+          {{ item.active ? 'Baja' : 'Dar de alta' }}
+        </button>
       </div>
-      <button>Guardar</button>
-    </form>
-    <div class="item" *ngFor="let item of state.enrollments()">
-      <span>{{ item.student.name }} <small>{{ item.schedule.name }} / {{ item.frequencyPerWeek }} dias</small></span>
-      <button type="button" (click)="state.deactivate('enrollments', item.id)">Baja</button>
     </div>
   </article>
 </section>
