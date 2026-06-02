@@ -1,0 +1,10 @@
+.git/
+.agents/
+.codex/
+LagoAssist/node_modules/
+LagoAssist/dist/
+LagoAssist/.angular/
+clublago/target/
+**/.vscode/
+**/.idea/
+**/*.iml

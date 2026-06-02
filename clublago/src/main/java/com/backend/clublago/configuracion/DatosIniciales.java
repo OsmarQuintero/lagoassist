@@ -21,6 +21,7 @@ import com.backend.clublago.alumnos.EstatusAlumno;
 import com.backend.clublago.maestros.Maestro;
 import com.backend.clublago.maestros.MaestroRepository;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +34,7 @@ public class DatosIniciales implements CommandLineRunner {
 	private final AlumnoRepository alumnoRepository;
 	private final InscripcionRepository inscripcionRepository;
 	private final AsistenciaRepository asistenciaRepository;
+	private final boolean seedEnabled;
 
 	public DatosIniciales(
 		DisciplinaRepository disciplinaRepository,
@@ -40,7 +42,8 @@ public class DatosIniciales implements CommandLineRunner {
 		HorarioRepository horarioRepository,
 		AlumnoRepository alumnoRepository,
 		InscripcionRepository inscripcionRepository,
-		AsistenciaRepository asistenciaRepository
+		AsistenciaRepository asistenciaRepository,
+		@Value("${app.seed.enabled:true}") boolean seedEnabled
 	) {
 		this.disciplinaRepository = disciplinaRepository;
 		this.maestroRepository = maestroRepository;
@@ -48,10 +51,14 @@ public class DatosIniciales implements CommandLineRunner {
 		this.alumnoRepository = alumnoRepository;
 		this.inscripcionRepository = inscripcionRepository;
 		this.asistenciaRepository = asistenciaRepository;
+		this.seedEnabled = seedEnabled;
 	}
 
 	@Override
 	public void run(String... args) {
+		if (!seedEnabled) {
+			return;
+		}
 		if (disciplinaRepository.count() > 0) {
 			return;
 		}
