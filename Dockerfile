@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY clublago/.mvn clublago/.mvn
 COPY clublago/mvnw clublago/pom.xml clublago/
-RUN cd clublago && chmod +x mvnw && ./mvnw dependency:go-offline -B
+RUN cd clublago && chmod +x mvnw
 
 COPY clublago/src clublago/src
 RUN cd clublago && ./mvnw clean package -DskipTests
