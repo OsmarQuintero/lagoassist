@@ -62,6 +62,7 @@ public class AsistenciaController {
 					attendance == null ? null : attendance.getId(),
 					enrollment.getStudent().getId(),
 					enrollment.getStudent().getName(),
+					enrollment.getStudent().getStatus(),
 					enrollment.getFrequencyPerWeek(),
 					enrollment.getSelectedDays(),
 					attendance == null ? EstatusAsistencia.FALTA : attendance.getStatus(),

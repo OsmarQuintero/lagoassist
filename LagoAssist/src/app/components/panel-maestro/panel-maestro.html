@@ -58,8 +58,11 @@
           <span>Presente</span>
           <span>Falta</span>
         </div>
-        <div class="excel-row" *ngFor="let row of state.rollCall()">
-          <strong>{{ row.studentName }}</strong>
+        <div class="excel-row" *ngFor="let row of state.rollCall()" [class.student-debt]="state.isDebtorRollCallRow(row)">
+          <strong>
+            {{ row.studentName }}
+            <small *ngIf="state.isDebtorRollCallRow(row)">ADEUDO</small>
+          </strong>
           <label class="status-cell" *ngFor="let status of state.rollCallStatuses">
             <input type="checkbox" [checked]="row.status === status" [disabled]="state.rollCallLocked()" (change)="state.saveAttendance(row, status)" />
           </label>

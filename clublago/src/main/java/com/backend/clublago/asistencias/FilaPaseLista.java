@@ -3,6 +3,7 @@ package com.backend.clublago.asistencias;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import com.backend.clublago.alumnos.EstatusAlumno;
 import com.backend.clublago.horarios.DiaSemana;
 
 public record FilaPaseLista(
@@ -10,6 +11,7 @@ public record FilaPaseLista(
 	Long attendanceId,
 	Long studentId,
 	String studentName,
+	EstatusAlumno studentStatus,
 	int frequencyPerWeek,
 	Set<DiaSemana> selectedDays,
 	EstatusAsistencia status,

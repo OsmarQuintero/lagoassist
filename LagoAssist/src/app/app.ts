@@ -70,6 +70,7 @@ interface RollCallRow {
   attendanceId: number | null;
   studentId: number;
   studentName: string;
+  studentStatus: StudentStatus;
   frequencyPerWeek: number;
   selectedDays: string[];
   status: AttendanceStatus;
@@ -161,6 +162,14 @@ export class App implements OnInit, OnDestroy {
   readonly statuses: AttendanceStatus[] = ['PRESENTE', 'FALTA', 'RETARDO', 'JUSTIFICADO'];
   readonly rollCallStatuses: AttendanceStatus[] = ['PRESENTE', 'FALTA'];
   readonly studentStatuses: StudentStatus[] = ['ACTIVO', 'BAJA', 'SUSPENDIDO', 'ADEUDO'];
+  readonly actionMemberTypes = [
+    { value: '', label: 'Titular' },
+    { value: 'C', label: 'Conyuge' },
+    { value: 'H', label: 'Hijo/a' },
+    { value: 'M', label: 'Mama' },
+    { value: 'P', label: 'Papa' },
+    { value: 'A', label: 'Abuelo/a' },
+  ];
 
   tab = signal('dashboard-admin');
   message = signal('');
@@ -205,7 +214,7 @@ export class App implements OnInit, OnDestroy {
     capacity: 10,
     active: true,
   };
-  studentForm = { name: '', actionNumber: '', phone: '', email: '', status: 'ACTIVO' as StudentStatus, active: true };
+  studentForm = { name: '', actionBase: '', actionMemberType: '', phone: '', email: '', status: 'ACTIVO' as StudentStatus, active: true };
   enrollmentForm = { studentId: 0, scheduleId: 0, frequencyPerWeek: 1, selectedDays: [] as string[], active: true };
   attendanceFilters = { scheduleId: 0, date: localDateInput() };
   reportGroup = 'discipline';
@@ -480,9 +489,17 @@ export class App implements OnInit, OnDestroy {
 
   saveStudent() {
     const id = this.editingStudentId();
+    const payload = {
+      name: this.studentForm.name,
+      actionNumber: this.studentActionNumber(),
+      phone: this.studentForm.phone,
+      email: this.studentForm.email,
+      status: this.studentForm.status,
+      active: this.studentForm.active,
+    };
     const request = id
-      ? this.http.put<Student>(`${this.api}/students/${id}`, this.studentForm)
-      : this.http.post<Student>(`${this.api}/students`, this.studentForm);
+      ? this.http.put<Student>(`${this.api}/students/${id}`, payload)
+      : this.http.post<Student>(`${this.api}/students`, payload);
     request.subscribe(() => {
       this.cancelStudentEdit();
       this.done(id ? 'Alumno actualizado' : 'Alumno guardado');
@@ -643,10 +660,12 @@ export class App implements OnInit, OnDestroy {
   }
 
   editStudent(item: Student) {
+    const action = this.parseActionNumber(item.actionNumber);
     this.editingStudentId.set(item.id);
     this.studentForm = {
       name: item.name,
-      actionNumber: item.actionNumber,
+      actionBase: action.base,
+      actionMemberType: action.memberType,
       phone: item.phone,
       email: item.email,
       status: item.status,
@@ -656,7 +675,7 @@ export class App implements OnInit, OnDestroy {
 
   cancelStudentEdit() {
     this.editingStudentId.set(null);
-    this.studentForm = { name: '', actionNumber: '', phone: '', email: '', status: 'ACTIVO', active: true };
+    this.studentForm = { name: '', actionBase: '', actionMemberType: '', phone: '', email: '', status: 'ACTIVO', active: true };
   }
 
   editSchedule(item: ClassSchedule) {
@@ -804,6 +823,26 @@ export class App implements OnInit, OnDestroy {
   studentClassSummary(studentId: number) {
     const classes = this.studentEnrollments(studentId).map((enrollment) => enrollment.schedule.name);
     return classes.length ? classes.join(', ') : 'Sin clases inscritas';
+  }
+
+  studentActionNumber() {
+    const base = this.studentForm.actionBase.trim();
+    const memberType = this.studentForm.actionMemberType.trim();
+    return memberType ? `${memberType}-${base}` : base;
+  }
+
+  studentActionLabel(student: Student) {
+    return student.actionNumber || 'Sin accion';
+  }
+
+  isDebtorRollCallRow(row: RollCallRow) {
+    return row.studentStatus === 'ADEUDO';
+  }
+
+  private parseActionNumber(actionNumber: string) {
+    const value = actionNumber.trim();
+    const match = value.match(/^([A-Z]+)-(.+)$/);
+    return match ? { memberType: match[1], base: match[2] } : { memberType: '', base: value };
   }
 
   downloadAttendanceReport(format: 'xlsx' | 'pdf') {

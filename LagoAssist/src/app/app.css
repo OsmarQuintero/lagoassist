@@ -335,6 +335,12 @@ nav button {
   margin: 16px 0;
 }
 
+.form-hint {
+  display: block;
+  color: #52635b;
+  font-size: 0.84rem;
+}
+
 input,
 select {
   width: 100%;
@@ -618,6 +624,22 @@ select {
 
 .excel-row > :first-child {
   border-left: 0;
+}
+
+.excel-row.student-debt {
+  background: #fff1f1;
+}
+
+.excel-row.student-debt > :first-child {
+  color: #8b1f1f;
+}
+
+.excel-row.student-debt small {
+  display: block;
+  margin-top: 2px;
+  color: #b42323;
+  font-size: 0.68rem;
+  font-weight: 700;
 }
 
 .excel-head {

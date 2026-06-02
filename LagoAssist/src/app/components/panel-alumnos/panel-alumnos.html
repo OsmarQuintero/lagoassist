@@ -3,7 +3,13 @@
     <h3>Alumnos</h3>
     <form (ngSubmit)="state.saveStudent()" class="form">
       <input name="studentName" [(ngModel)]="state.studentForm.name" placeholder="Nombre" required />
-      <input name="studentActionNumber" [(ngModel)]="state.studentForm.actionNumber" placeholder="Número de acción" required />
+      <div class="inline">
+        <input name="studentActionBase" [(ngModel)]="state.studentForm.actionBase" placeholder="Número de acción" required />
+        <select name="studentActionMemberType" [(ngModel)]="state.studentForm.actionMemberType">
+          <option *ngFor="let memberType of state.actionMemberTypes" [ngValue]="memberType.value">{{ memberType.label }}</option>
+        </select>
+      </div>
+      <small class="form-hint">Clave: {{ state.studentActionNumber() || 'pendiente' }}</small>
       <input name="studentPhone" [(ngModel)]="state.studentForm.phone" placeholder="Telefono" />
       <input name="studentEmail" [(ngModel)]="state.studentForm.email" placeholder="Correo" />
       <select name="studentStatus" [(ngModel)]="state.studentForm.status">
@@ -88,7 +94,7 @@
       <span>
         {{ item.name }}
         <small>
-          Acción {{ item.actionNumber }} / {{ item.status }}
+          Acción {{ state.studentActionLabel(item) }} / {{ item.status }}
           <ng-container *ngIf="item.phone"> / {{ item.phone }}</ng-container>
           <ng-container *ngIf="item.email"> / {{ item.email }}</ng-container>
           / Clases: {{ state.studentClassSummary(item.id) }}
