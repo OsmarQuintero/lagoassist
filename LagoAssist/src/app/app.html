@@ -1,0 +1,27 @@
+<app-panel-login *ngIf="!isAuthenticated()" [state]="state"></app-panel-login>
+
+<main class="shell" [class.sidebar-open]="currentRole() === 'admin' && sidebarOpen()" *ngIf="isAuthenticated()">
+  <app-menu-lateral *ngIf="currentRole() === 'admin'" [state]="state"></app-menu-lateral>
+  <button *ngIf="currentRole() === 'admin'" class="sidebar-backdrop" type="button" aria-label="Cerrar menu" (click)="toggleSidebar()"></button>
+
+  <section class="workspace">
+    <header class="topbar">
+      <button *ngIf="currentRole() === 'admin'" class="menu-button" type="button" aria-label="Abrir menu" (click)="toggleSidebar()">☰</button>
+      <div class="top-title">
+        <p class="eyebrow">{{ currentRole() === 'admin' ? 'Panel administrativo' : 'Panel de maestros' }}</p>
+        <h2>{{ tab() | titlecase }}</h2>
+      </div>
+      <div class="top-actions">
+        <strong *ngIf="message()">{{ message() }}</strong>
+        <button type="button" (click)="logout()">Salir</button>
+      </div>
+    </header>
+
+    <app-panel-admin *ngIf="tab() === 'dashboard-admin'" [state]="state"></app-panel-admin>
+    <app-panel-maestro *ngIf="tab() === 'dashboard-teacher'" [state]="state"></app-panel-maestro>
+    <app-panel-catalogos *ngIf="tab() === 'catalogos'" [state]="state"></app-panel-catalogos>
+    <app-panel-alumnos *ngIf="tab() === 'alumnos'" [state]="state"></app-panel-alumnos>
+    <app-panel-inscripciones *ngIf="tab() === 'inscripciones'" [state]="state"></app-panel-inscripciones>
+    <app-panel-reportes *ngIf="tab() === 'reportes'" [state]="state"></app-panel-reportes>
+  </section>
+</main>

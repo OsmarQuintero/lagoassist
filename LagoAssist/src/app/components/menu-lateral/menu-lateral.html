@@ -1,0 +1,38 @@
+<aside class="sidebar">
+  <div class="brand">
+    <img src="/clublago-removebg-preview.png" alt="Club del Lago" />
+    <div class="brand-copy">
+      <p class="eyebrow">Club del Lago A.C.</p>
+      <h1>LagoAssist</h1>
+    </div>
+  </div>
+
+  <button class="sidebar-close" type="button" (click)="state.toggleSidebar()">
+    Cerrar
+  </button>
+
+  <nav>
+    <ng-container *ngIf="state.currentRole() === 'admin'">
+      <button type="button" data-short="D" [class.active]="state.tab() === 'dashboard-admin'" (click)="state.setTab('dashboard-admin')">
+        <span>Dashboard</span>
+      </button>
+      <button type="button" data-short="C" [class.active]="state.tab() === 'catalogos'" (click)="state.setTab('catalogos')">
+        <span>Catálogos</span>
+      </button>
+      <button type="button" data-short="A" [class.active]="state.tab() === 'alumnos'" (click)="state.setTab('alumnos')">
+        <span>Alumnos</span>
+      </button>
+      <button type="button" data-short="I" [class.active]="state.tab() === 'inscripciones'" (click)="state.setTab('inscripciones')">
+        <span>Inscripciones</span>
+      </button>
+      <button type="button" data-short="R" [class.active]="state.tab() === 'reportes'" (click)="state.setTab('reportes')">
+        <span>Reportes</span>
+      </button>
+    </ng-container>
+    <ng-container *ngIf="state.currentRole() === 'teacher'">
+      <button type="button" data-short="P" [class.active]="state.tab() === 'dashboard-teacher'" (click)="state.setTab('dashboard-teacher')">
+        <span>Panel maestro</span>
+      </button>
+    </ng-container>
+  </nav>
+</aside>

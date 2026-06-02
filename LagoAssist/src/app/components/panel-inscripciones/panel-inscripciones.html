@@ -1,0 +1,51 @@
+<section class="grid single">
+  <article class="panel">
+    <h3>Clases y horarios</h3>
+    <form (ngSubmit)="state.saveSchedule()" class="form">
+      <input name="scheduleName" [(ngModel)]="state.scheduleForm.name" placeholder="Nombre de la clase" required />
+      <select name="disciplineId" [(ngModel)]="state.scheduleForm.disciplineId" (change)="state.onScheduleDisciplineChange()">
+        <option *ngFor="let discipline of state.disciplines()" [ngValue]="discipline.id">{{ discipline.name }}</option>
+      </select>
+      <select name="teacherId" [(ngModel)]="state.scheduleForm.teacherId">
+        <option *ngFor="let teacher of state.scheduleTeacherOptions()" [ngValue]="teacher.id">{{ teacher.name }}</option>
+      </select>
+      <div class="empty-state compact" *ngIf="!state.scheduleTeacherOptions().length">
+        No hay maestros asignados a esta disciplina.
+      </div>
+      <div class="inline">
+        <input name="startTime" type="time" [(ngModel)]="state.scheduleForm.startTime" />
+        <input name="endTime" type="time" [(ngModel)]="state.scheduleForm.endTime" />
+        <input name="capacity" type="number" min="1" [(ngModel)]="state.scheduleForm.capacity" />
+      </div>
+      <div class="checks">
+        <label *ngFor="let day of state.days">
+          <input type="checkbox" [checked]="state.isSelected(state.scheduleForm.days, day.value)" (change)="state.toggleSelection(state.scheduleForm.days, day.value)" />
+          {{ day.label }}
+        </label>
+      </div>
+      <button>{{ state.editingScheduleId() ? 'Actualizar' : 'Guardar' }}</button>
+      <button type="button" *ngIf="state.editingScheduleId()" (click)="state.cancelScheduleEdit()">Cancelar</button>
+    </form>
+    <div class="item" *ngFor="let item of state.schedules()">
+      <span>
+        {{ item.name }}
+        <small>
+          {{ item.discipline.name }} / {{ item.teacher.name }} / {{ state.formatDays(item.days) }} /
+          {{ item.startTime }}-{{ item.endTime }} / Cupo {{ state.enrollmentCountForSchedule(item.id) }}/{{ item.capacity }} /
+          {{ item.active ? 'ACTIVO' : 'BAJA' }}
+        </small>
+      </span>
+
+      <div class="item-actions">
+        <button type="button" (click)="state.editSchedule(item)">Editar</button>
+        <button
+          type="button"
+          [class.restore]="!item.active"
+          (click)="item.active ? state.deactivate('schedules', item.id) : state.reactivate('schedules', item.id)"
+        >
+          {{ item.active ? 'Baja' : 'Dar de alta' }}
+        </button>
+      </div>
+    </div>
+  </article>
+</section>

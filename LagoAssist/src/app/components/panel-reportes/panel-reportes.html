@@ -1,0 +1,47 @@
+<section class="panel">
+  <div class="filters">
+    <label>
+      Agrupar por
+      <select [(ngModel)]="state.reportGroup" (change)="state.loadAttendanceReport()">
+        <option value="discipline">Disciplina</option>
+        <option value="teacher">Maestro</option>
+        <option value="schedule">Horario</option>
+        <option value="student">Alumno</option>
+      </select>
+    </label>
+    <label>
+      Desde
+      <input type="date" [(ngModel)]="state.reportFilters.from" (change)="state.loadAttendanceReport()" />
+    </label>
+    <label>
+      Hasta
+      <input type="date" [(ngModel)]="state.reportFilters.to" (change)="state.loadAttendanceReport()" />
+    </label>
+    <button type="button" (click)="state.downloadAttendanceReport('xlsx')">Excel</button>
+    <button type="button" (click)="state.downloadAttendanceReport('pdf')">PDF</button>
+  </div>
+  <div class="metrics" *ngIf="state.dashboard() as stats">
+    <span><strong>{{ stats.presentRecords }}</strong> asistencias</span>
+    <span><strong>{{ stats.absentRecords }}</strong> faltas</span>
+  </div>
+  <div class="table report">
+    <div class="row head">
+      <span>Grupo</span>
+      <span>Total</span>
+      <span>Presente</span>
+      <span>Retardo</span>
+      <span>Falta</span>
+      <span>Just.</span>
+      <span>%</span>
+    </div>
+    <div class="row" *ngFor="let row of state.reportRows()">
+      <strong data-label="Grupo">{{ row.label }}</strong>
+      <span data-label="Total">{{ row.total }}</span>
+      <span data-label="Presente">{{ row.present }}</span>
+      <span data-label="Retardo">{{ row.late }}</span>
+      <span data-label="Falta">{{ row.absent }}</span>
+      <span data-label="Just.">{{ row.justified }}</span>
+      <span data-label="%">{{ row.attendancePercentage }}%</span>
+    </div>
+  </div>
+</section>

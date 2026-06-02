@@ -1,0 +1,77 @@
+<section class="dashboard teacher-page">
+  <p class="eyebrow" *ngIf="state.selectedTeacher() as teacher">{{ teacher.name }}</p>
+
+  <ng-container *ngIf="!state.selectedTeacherSchedule(); else listaClase">
+    <div class="kpis">
+      <article class="kpi">
+        <span>Clases asignadas</span>
+        <strong>{{ state.teacherSchedules().length }}</strong>
+      </article>
+      <article class="kpi">
+        <span>Alumnos inscritos</span>
+        <strong>{{ state.teacherStudentsCount() }}</strong>
+      </article>
+      <article class="kpi">
+        <span>Cupo total</span>
+        <strong>{{ state.teacherCapacity() }}</strong>
+      </article>
+      <article class="kpi">
+        <span>Ocupacion</span>
+        <strong>{{ state.teacherOccupancyPercentage() }}%</strong>
+      </article>
+    </div>
+
+    <section class="teacher-card-grid">
+      <button class="class-card" type="button" *ngFor="let schedule of state.teacherSchedules()" (click)="state.openTeacherSchedule(schedule)">
+        <span class="eyebrow">{{ schedule.discipline.name }}</span>
+        <strong>{{ schedule.name }}</strong>
+        <small>{{ state.formatDays(schedule.days) }}</small>
+        <small>{{ schedule.startTime }} - {{ schedule.endTime }}</small>
+        <span>{{ state.enrollmentCountForSchedule(schedule.id) }}/{{ schedule.capacity }} alumnos</span>
+      </button>
+    </section>
+
+    <div class="empty-state" *ngIf="!state.teacherSchedules().length">
+      Todavía no tienes clases asignadas.
+    </div>
+  </ng-container>
+
+  <ng-template #listaClase>
+    <article class="panel teacher-rollcall" *ngIf="state.selectedTeacherSchedule() as schedule">
+      <div class="rollcall-head">
+        <button type="button" (click)="state.closeTeacherSchedule()">Volver</button>
+        <div>
+          <p class="eyebrow">{{ schedule.discipline.name }}</p>
+          <h3>{{ schedule.name }}</h3>
+          <small>{{ state.formatDays(schedule.days) }} / {{ schedule.startTime }} - {{ schedule.endTime }}</small>
+        </div>
+        <div class="rollcall-meta">
+          <span>Fecha {{ state.currentDateText() }}</span>
+          <span>Hora {{ state.currentTimeText() }}</span>
+          <span [class.locked]="state.rollCallLocked()">{{ state.rollCallStatusText() }}</span>
+        </div>
+      </div>
+
+      <div class="excel-table">
+        <div class="excel-row excel-head">
+          <span>Alumno</span>
+          <span>Presente</span>
+          <span>Falta</span>
+        </div>
+        <div class="excel-row" *ngFor="let row of state.rollCall()">
+          <strong>{{ row.studentName }}</strong>
+          <label class="status-cell" *ngFor="let status of state.rollCallStatuses">
+            <input type="checkbox" [checked]="row.status === status" [disabled]="state.rollCallLocked()" (change)="state.saveAttendance(row, status)" />
+          </label>
+        </div>
+      </div>
+
+      <div class="rollcall-actions">
+        <span>Cupo {{ state.capacityText() }}</span>
+        <button type="button" (click)="state.saveRollCall()" [disabled]="state.rollCallLocked() || !state.rollCall().length">
+          Guardar lista
+        </button>
+      </div>
+    </article>
+  </ng-template>
+</section>
