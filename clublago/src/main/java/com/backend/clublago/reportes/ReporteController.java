@@ -2,6 +2,7 @@ package com.backend.clublago.reportes;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -85,18 +86,24 @@ public class ReporteController {
 	}
 
 	@GetMapping("/attendance")
-	List<FilaReporteAsistencia> attendance(@RequestParam(defaultValue = "discipline") String groupBy) {
-		return attendanceRows(groupBy);
+	List<FilaReporteAsistencia> attendance(
+		@RequestParam(defaultValue = "discipline") String groupBy,
+		@RequestParam(required = false) LocalDate from,
+		@RequestParam(required = false) LocalDate to
+	) {
+		return attendanceRows(groupBy, from, to);
 	}
 
 	@GetMapping("/attendance/export")
 	ResponseEntity<byte[]> exportAttendance(
 		@RequestParam(defaultValue = "discipline") String groupBy,
-		@RequestParam(defaultValue = "xlsx") String format
+		@RequestParam(defaultValue = "xlsx") String format,
+		@RequestParam(required = false) LocalDate from,
+		@RequestParam(required = false) LocalDate to
 	) throws IOException, DocumentException {
-		List<FilaReporteAsistencia> rows = attendanceRows(groupBy);
+		List<FilaReporteAsistencia> rows = attendanceRows(groupBy, from, to);
 		boolean pdf = "pdf".equalsIgnoreCase(format);
-		byte[] file = pdf ? toPdf(groupBy, rows) : toExcel(groupBy, rows);
+		byte[] file = pdf ? toPdf(groupBy, rows, from, to) : toExcel(groupBy, rows, from, to);
 		String extension = pdf ? "pdf" : "xlsx";
 		String contentType = pdf
 			? MediaType.APPLICATION_PDF_VALUE
@@ -108,7 +115,7 @@ public class ReporteController {
 			.body(file);
 	}
 
-	private List<FilaReporteAsistencia> attendanceRows(String groupBy) {
+	private List<FilaReporteAsistencia> attendanceRows(String groupBy, LocalDate from, LocalDate to) {
 		Function<Asistencia, String> classifier = switch (groupBy) {
 			case "teacher" -> attendance -> attendance.getEnrollment().getSchedule().getTeacher().getName();
 			case "schedule" -> attendance -> attendance.getEnrollment().getSchedule().getName();
@@ -117,6 +124,7 @@ public class ReporteController {
 		};
 		Map<String, List<Asistencia>> grouped = attendanceRepository.findAll()
 			.stream()
+			.filter(attendance -> inRange(attendance, from, to))
 			.collect(Collectors.groupingBy(classifier));
 		return grouped.entrySet()
 			.stream()
@@ -125,13 +133,15 @@ public class ReporteController {
 			.toList();
 	}
 
-	private byte[] toExcel(String groupBy, List<FilaReporteAsistencia> rows) throws IOException {
+	private byte[] toExcel(String groupBy, List<FilaReporteAsistencia> rows, LocalDate from, LocalDate to) throws IOException {
 		try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
 			Sheet sheet = workbook.createSheet("Reporte");
 			Row title = sheet.createRow(0);
 			title.createCell(0).setCellValue("Reporte de asistencias por " + groupLabel(groupBy));
+			Row range = sheet.createRow(1);
+			range.createCell(0).setCellValue(rangeLabel(from, to));
 
-			Row header = sheet.createRow(2);
+			Row header = sheet.createRow(3);
 			String[] headers = { "Grupo", "Total", "Presente", "Retardo", "Falta", "Justificada", "Porcentaje" };
 			for (int index = 0; index < headers.length; index++) {
 				header.createCell(index).setCellValue(headers[index]);
@@ -139,7 +149,7 @@ public class ReporteController {
 
 			for (int index = 0; index < rows.size(); index++) {
 				FilaReporteAsistencia report = rows.get(index);
-				Row row = sheet.createRow(index + 3);
+				Row row = sheet.createRow(index + 4);
 				row.createCell(0).setCellValue(report.label());
 				row.createCell(1).setCellValue(report.total());
 				row.createCell(2).setCellValue(report.present());
@@ -157,12 +167,13 @@ public class ReporteController {
 		}
 	}
 
-	private byte[] toPdf(String groupBy, List<FilaReporteAsistencia> rows) throws DocumentException {
+	private byte[] toPdf(String groupBy, List<FilaReporteAsistencia> rows, LocalDate from, LocalDate to) throws DocumentException {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		Document document = new Document();
 		PdfWriter.getInstance(document, output);
 		document.open();
 		document.add(new Paragraph("Reporte de asistencias por " + groupLabel(groupBy)));
+		document.add(new Paragraph(rangeLabel(from, to)));
 		document.add(new Paragraph(" "));
 
 		PdfPTable table = new PdfPTable(7);
@@ -193,6 +204,26 @@ public class ReporteController {
 		long total = registros.size();
 		double porcentaje = total == 0 ? 0 : ((presentes + retardos) * 100.0) / total;
 		return new FilaReporteAsistencia(etiqueta, total, presentes, retardos, faltas, justificados, Math.round(porcentaje * 10.0) / 10.0);
+	}
+
+	private boolean inRange(Asistencia attendance, LocalDate from, LocalDate to) {
+		LocalDate date = attendance.getAttendanceDate();
+		if (date == null) {
+			return false;
+		}
+		boolean afterStart = from == null || !date.isBefore(from);
+		boolean beforeEnd = to == null || !date.isAfter(to);
+		return afterStart && beforeEnd;
+	}
+
+	private String rangeLabel(LocalDate from, LocalDate to) {
+		if (from == null && to == null) {
+			return "Periodo: todo el historial";
+		}
+		if (from != null && to != null) {
+			return "Periodo: " + from + " a " + to;
+		}
+		return from != null ? "Periodo: desde " + from : "Periodo: hasta " + to;
 	}
 
 	private long count(List<Asistencia> registros, EstatusAsistencia estatus) {
