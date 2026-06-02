@@ -1,0 +1,14 @@
+/.agents/
+/.codex/
+/.angular/
+/.git/
+
+LagoAssist/node_modules/
+LagoAssist/dist/
+LagoAssist/.angular/
+LagoAssist/.history/
+
+clublago/target/
+
+.DS_Store
+Thumbs.db
