@@ -10,5 +10,7 @@ LagoAssist/.history/
 
 clublago/target/
 
+.env
+
 .DS_Store
 Thumbs.db

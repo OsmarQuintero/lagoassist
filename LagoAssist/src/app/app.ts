@@ -1,5 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewEncapsulation, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
@@ -168,7 +168,7 @@ export class App implements OnInit, OnDestroy {
     { value: 'H', label: 'Hijo/a' },
     { value: 'M', label: 'Mama' },
     { value: 'P', label: 'Papa' },
-    { value: 'A', label: 'Abuelo/a' },
+    { value: 'S', label: 'Suegro/a' },
   ];
 
   tab = signal('dashboard-admin');
@@ -481,9 +481,18 @@ export class App implements OnInit, OnDestroy {
     const request = id
       ? this.http.put<ClassSchedule>(`${this.api}/schedules/${id}`, this.scheduleForm)
       : this.http.post<ClassSchedule>(`${this.api}/schedules`, this.scheduleForm);
-    request.subscribe(() => {
-      this.cancelScheduleEdit();
-      this.done(id ? 'Horario actualizado' : 'Horario guardado');
+    request.subscribe({
+      next: () => {
+        this.cancelScheduleEdit();
+        this.done(id ? 'Horario actualizado' : 'Horario guardado');
+      },
+      error: (error: HttpErrorResponse) => {
+        this.message.set(
+          error.status === 409
+            ? 'Este maestro ya tiene una clase de la misma disciplina en ese dia y horario.'
+            : 'No se pudo guardar el horario. Revisa los datos.'
+        );
+      },
     });
   }
 

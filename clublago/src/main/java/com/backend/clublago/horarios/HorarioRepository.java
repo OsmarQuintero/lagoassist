@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface HorarioRepository extends JpaRepository<Horario, Long> {
 	List<Horario> findByActivoTrueOrderByNombre();
 	List<Horario> findByDisciplinaIdAndActivoTrueOrderByHoraInicio(Long disciplineId);
+	List<Horario> findByDisciplinaIdAndMaestroIdAndActivoTrueOrderByHoraInicio(Long disciplineId, Long teacherId);
 }

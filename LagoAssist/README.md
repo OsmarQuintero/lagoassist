@@ -21,6 +21,32 @@ User: sa
 Password:
 ```
 
+## Docker Compose
+
+La aplicación completa se ejecuta con tres servicios: `web` (Angular y Nginx),
+`api` (Spring Boot) y `db` (PostgreSQL). Desde la raíz del repositorio, copia
+el archivo de variables y define una contraseña segura:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+Abre `http://localhost` (o el puerto definido en `WEB_PORT`). El frontend usa
+`/api`, que Nginx reenvía al servicio backend; PostgreSQL no se expone al host.
+
+Para detener los contenedores:
+
+```bash
+docker compose down
+```
+
+Para eliminar también los datos de PostgreSQL:
+
+```bash
+docker compose down -v
+```
+
 ## Frontend
 
 Requiere Node `20.19` o `22.12` como minimo por Angular 21.
