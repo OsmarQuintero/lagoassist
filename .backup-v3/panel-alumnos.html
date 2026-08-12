@@ -39,7 +39,17 @@
       <button>{{ state.editingEnrollmentId() ? 'Actualizar' : 'Guardar' }}</button>
       <button type="button" *ngIf="state.editingEnrollmentId()" (click)="state.cancelEnrollmentEdit()">Cancelar</button>
     </form>
+    <div class="list-toolbar">
+      <label>
+        <input type="checkbox" [checked]="state.allEnrollmentsSelected()" (change)="state.toggleAllEnrollments()" />
+        Todos
+      </label>
+      <button type="button" (click)="state.deleteSelectedEnrollments()" [disabled]="!state.selectedEnrollmentIds().length">
+        Eliminar seleccionados ({{ state.selectedEnrollmentIds().length }})
+      </button>
+    </div>
     <div class="item" *ngFor="let item of state.activeEnrollments()">
+      <input type="checkbox" class="item-checkbox" [checked]="state.isEnrollmentSelected(item.id)" (change)="state.toggleEnrollmentSelection(item.id)" />
       <span>
         {{ item.student.name }}
         <small>

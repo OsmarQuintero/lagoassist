@@ -2,7 +2,6 @@ package com.backend.clublago.disciplinas;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,22 +29,15 @@ public class DisciplinaController {
 	}
 
 	@PostMapping
-	ResponseEntity<?> create(@RequestBody Disciplina discipline) {
-		if (repository.findByNombreIgnoreCase(discipline.getName()).isPresent()) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).build();
-		}
+	Disciplina create(@RequestBody Disciplina discipline) {
 		discipline.setId(null);
-		return ResponseEntity.ok(repository.save(discipline));
+		return repository.save(discipline);
 	}
 
 	@PutMapping("/{id}")
-	ResponseEntity<?> update(@PathVariable Long id, @RequestBody Disciplina request) {
+	ResponseEntity<Disciplina> update(@PathVariable Long id, @RequestBody Disciplina request) {
 		return repository.findById(id)
 			.map(discipline -> {
-				var existing = repository.findByNombreIgnoreCase(request.getName());
-				if (existing.isPresent() && !existing.get().getId().equals(id)) {
-					return ResponseEntity.status(HttpStatus.CONFLICT).<Disciplina>build();
-				}
 				discipline.setName(request.getName());
 				discipline.setActivityType(request.getActivityType());
 				discipline.setActive(request.isActive());

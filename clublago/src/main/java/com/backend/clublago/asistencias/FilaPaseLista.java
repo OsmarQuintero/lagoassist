@@ -1,6 +1,6 @@
 package com.backend.clublago.asistencias;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Set;
 
 import com.backend.clublago.alumnos.EstatusAlumno;
@@ -16,8 +16,8 @@ public record FilaPaseLista(
 	Set<DiaSemana> selectedDays,
 	EstatusAsistencia status,
 	String observations,
-	LocalDateTime savedAt,
-	LocalDateTime editableUntil,
+	Instant savedAt,
+	Instant editableUntil,
 	boolean locked
 ) {
 }

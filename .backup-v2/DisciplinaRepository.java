@@ -1,11 +1,9 @@
 package com.backend.clublago.disciplinas;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface DisciplinaRepository extends JpaRepository<Disciplina, Long> {
 	List<Disciplina> findByActivoTrueOrderByNombre();
-	Optional<Disciplina> findByNombreIgnoreCase(String nombre);
 }

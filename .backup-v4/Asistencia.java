@@ -1,7 +1,7 @@
 package com.backend.clublago.asistencias;
 
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.backend.clublago.inscripciones.Inscripcion;
 
@@ -40,7 +40,7 @@ public class Asistencia {
 	private String observaciones;
 
 	@Column(name = "guardado_en")
-	private Instant guardadoEn;
+	private LocalDateTime guardadoEn;
 
 	public Long getId() {
 		return id;
@@ -82,11 +82,11 @@ public class Asistencia {
 		this.observaciones = observaciones;
 	}
 
-	public Instant getSavedAt() {
+	public LocalDateTime getSavedAt() {
 		return guardadoEn;
 	}
 
-	public void setSavedAt(Instant guardadoEn) {
+	public void setSavedAt(LocalDateTime guardadoEn) {
 		this.guardadoEn = guardadoEn;
 	}
 }

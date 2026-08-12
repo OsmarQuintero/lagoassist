@@ -300,8 +300,6 @@ export class App implements OnInit, OnDestroy {
       return matchesQuery && matchesStatus && matchesActivity;
     });
   });
-  activeEnrollments = computed(() => this.enrollments().filter((enrollment) => enrollment.active));
-  enrollableStudents = computed(() => this.students().filter((student) => student.active));
   currentDateText = computed(() =>
     this.currentDateTime().toLocaleDateString('es-MX', {
       weekday: 'long',
@@ -461,18 +459,9 @@ export class App implements OnInit, OnDestroy {
     const request = id
       ? this.http.put<Discipline>(`${this.api}/disciplines/${id}`, this.disciplineForm)
       : this.http.post<Discipline>(`${this.api}/disciplines`, this.disciplineForm);
-    request.subscribe({
-      next: () => {
-        this.cancelDisciplineEdit();
-        this.done(id ? 'Disciplina actualizada' : 'Disciplina guardada');
-      },
-      error: (error: HttpErrorResponse) => {
-        this.message.set(
-          error.status === 409
-            ? 'Ya existe una disciplina con ese nombre.'
-            : 'No se pudo guardar la disciplina. Revisa los datos.'
-        );
-      },
+    request.subscribe(() => {
+      this.cancelDisciplineEdit();
+      this.done(id ? 'Disciplina actualizada' : 'Disciplina guardada');
     });
   }
 

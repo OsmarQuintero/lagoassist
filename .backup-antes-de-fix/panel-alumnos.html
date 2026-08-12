@@ -24,7 +24,7 @@
     <h3>Inscribir alumno a clases</h3>
     <form (ngSubmit)="state.saveEnrollment()" class="form">
       <select name="enrollmentStudent" [(ngModel)]="state.enrollmentForm.studentId">
-        <option *ngFor="let student of state.enrollableStudents()" [ngValue]="student.id">{{ student.name }}</option>
+        <option *ngFor="let student of state.students()" [ngValue]="student.id">{{ student.name }}</option>
       </select>
       <select name="enrollmentSchedule" [(ngModel)]="state.enrollmentForm.scheduleId">
         <option *ngFor="let schedule of state.schedules()" [ngValue]="schedule.id">{{ schedule.name }}</option>
@@ -39,7 +39,7 @@
       <button>{{ state.editingEnrollmentId() ? 'Actualizar' : 'Guardar' }}</button>
       <button type="button" *ngIf="state.editingEnrollmentId()" (click)="state.cancelEnrollmentEdit()">Cancelar</button>
     </form>
-    <div class="item" *ngFor="let item of state.activeEnrollments()">
+    <div class="item" *ngFor="let item of state.enrollments()">
       <span>
         {{ item.student.name }}
         <small>

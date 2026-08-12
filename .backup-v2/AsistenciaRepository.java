@@ -12,6 +12,5 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
 	List<Asistencia> findByInscripcionHorarioDisciplinaId(Long disciplineId);
 	List<Asistencia> findByInscripcionHorarioMaestroId(Long teacherId);
 	Optional<Asistencia> findByInscripcionIdAndFechaAsistencia(Long enrollmentId, LocalDate attendanceDate);
-	List<Asistencia> findByInscripcionId(Long enrollmentId);
 	long countByEstatus(EstatusAsistencia status);
 }

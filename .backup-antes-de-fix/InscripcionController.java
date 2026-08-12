@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.backend.clublago.horarios.HorarioRepository;
 import com.backend.clublago.alumnos.AlumnoRepository;
-import com.backend.clublago.asistencias.AsistenciaRepository;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,18 +24,15 @@ public class InscripcionController {
 	private final InscripcionRepository inscripcionRepository;
 	private final AlumnoRepository alumnoRepository;
 	private final HorarioRepository horarioRepository;
-	private final AsistenciaRepository asistenciaRepository;
 
 	public InscripcionController(
 		InscripcionRepository inscripcionRepository,
 		AlumnoRepository alumnoRepository,
-		HorarioRepository horarioRepository,
-		AsistenciaRepository asistenciaRepository
+		HorarioRepository horarioRepository
 	) {
 		this.inscripcionRepository = inscripcionRepository;
 		this.alumnoRepository = alumnoRepository;
 		this.horarioRepository = horarioRepository;
-		this.asistenciaRepository = asistenciaRepository;
 	}
 
 	@GetMapping
@@ -47,7 +43,7 @@ public class InscripcionController {
 		if (studentId != null) {
 			return inscripcionRepository.findByAlumnoIdOrderByHorarioNombre(studentId);
 		}
-		return inscripcionRepository.findByActivoTrueOrderByAlumnoNombre();
+		return inscripcionRepository.findAllByOrderByAlumnoNombre();
 	}
 
 	@PostMapping
@@ -68,17 +64,6 @@ public class InscripcionController {
 			.map(inscripcion -> {
 				inscripcion.setActive(false);
 				inscripcionRepository.save(inscripcion);
-				return ResponseEntity.noContent().<Void>build();
-			})
-			.orElse(ResponseEntity.notFound().build());
-	}
-
-	@DeleteMapping("/{id}/permanente")
-	ResponseEntity<Void> deletePermanently(@PathVariable Long id) {
-		return inscripcionRepository.findById(id)
-			.map(inscripcion -> {
-				asistenciaRepository.deleteAll(asistenciaRepository.findByInscripcionId(id));
-				inscripcionRepository.delete(inscripcion);
 				return ResponseEntity.noContent().<Void>build();
 			})
 			.orElse(ResponseEntity.notFound().build());

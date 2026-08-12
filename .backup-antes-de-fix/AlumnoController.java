@@ -2,8 +2,6 @@ package com.backend.clublago.alumnos;
 
 import java.util.List;
 
-import com.backend.clublago.inscripciones.InscripcionRepository;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AlumnoController {
 
 	private final AlumnoRepository repository;
-	private final InscripcionRepository enrollmentRepository;
 
-	public AlumnoController(AlumnoRepository repository, InscripcionRepository enrollmentRepository) {
+	public AlumnoController(AlumnoRepository repository) {
 		this.repository = repository;
-		this.enrollmentRepository = enrollmentRepository;
 	}
 
 	@GetMapping
@@ -60,11 +56,6 @@ public class AlumnoController {
 				student.setActive(false);
 				student.setStatus(EstatusAlumno.BAJA);
 				repository.save(student);
-				enrollmentRepository.findByAlumnoIdOrderByHorarioNombre(id)
-					.forEach(enrollment -> {
-						enrollment.setActive(false);
-						enrollmentRepository.save(enrollment);
-					});
 				return ResponseEntity.noContent().<Void>build();
 			})
 			.orElse(ResponseEntity.notFound().build());

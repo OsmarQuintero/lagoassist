@@ -2,6 +2,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewEncapsulation, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 
 import { MenuLateral } from './components/menu-lateral/menu-lateral';
 import { PanelAdmin } from './components/panel-admin/panel-admin';
@@ -193,6 +194,7 @@ export class App implements OnInit, OnDestroy {
   editingStudentId = signal<number | null>(null);
   editingScheduleId = signal<number | null>(null);
   editingEnrollmentId = signal<number | null>(null);
+  selectedEnrollmentIds = signal<number[]>([]);
 
   disciplineForm = { name: '', activityType: 'Deportiva', active: true };
   teacherForm = {
@@ -747,6 +749,38 @@ export class App implements OnInit, OnDestroy {
       selectedDays: [],
       active: true,
     };
+  }
+
+  toggleEnrollmentSelection(id: number) {
+    const list = this.selectedEnrollmentIds();
+    this.selectedEnrollmentIds.set(list.includes(id) ? list.filter((value) => value !== id) : [...list, id]);
+  }
+
+  isEnrollmentSelected(id: number) {
+    return this.selectedEnrollmentIds().includes(id);
+  }
+
+  allEnrollmentsSelected() {
+    const ids = this.activeEnrollments().map((enrollment) => enrollment.id);
+    return ids.length > 0 && ids.every((id) => this.selectedEnrollmentIds().includes(id));
+  }
+
+  toggleAllEnrollments() {
+    this.selectedEnrollmentIds.set(
+      this.allEnrollmentsSelected() ? [] : this.activeEnrollments().map((enrollment) => enrollment.id),
+    );
+  }
+
+  deleteSelectedEnrollments() {
+    const ids = [...this.selectedEnrollmentIds()];
+    if (!ids.length) return;
+    forkJoin(ids.map((id) => this.http.delete(`${this.api}/enrollments/${id}/permanente`))).subscribe({
+      next: () => {
+        this.selectedEnrollmentIds.set([]);
+        this.done(ids.length === 1 ? 'Inscripción eliminada' : `${ids.length} inscripciones eliminadas`);
+      },
+      error: () => this.message.set('No se pudieron eliminar las inscripciones seleccionadas.'),
+    });
   }
 
   private catalogItem(path: string, id: number) {

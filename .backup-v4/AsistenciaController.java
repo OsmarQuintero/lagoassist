@@ -1,8 +1,7 @@
 package com.backend.clublago.asistencias;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Comparator;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -52,8 +51,8 @@ public class AsistenciaController {
 		var records = attendanceRepository.findByFechaAsistenciaAndInscripcionHorarioIdOrderByInscripcionAlumnoNombre(date, scheduleId);
 		Map<Long, Asistencia> recordsByEnrollment = records.stream()
 			.collect(Collectors.toMap(attendance -> attendance.getEnrollment().getId(), Function.identity()));
-		Instant editableUntil = editableUntil(records);
-		boolean locked = isLocked(records, Instant.now());
+		LocalDateTime editableUntil = editableUntil(records);
+		boolean locked = isLocked(records, LocalDateTime.now());
 		return enrollmentRepository.findByHorarioIdAndActivoTrueOrderByAlumnoNombre(scheduleId)
 			.stream()
 			.map(enrollment -> {
@@ -85,11 +84,11 @@ public class AsistenciaController {
 			request.attendanceDate(),
 			request.scheduleId()
 		);
-		Instant now = Instant.now();
+		LocalDateTime now = LocalDateTime.now();
 		if (isLocked(records, now)) {
 			return ResponseEntity.status(423).build();
 		}
-		Instant savedAt = savedAt(records);
+		LocalDateTime savedAt = savedAt(records);
 		if (savedAt == null) {
 			savedAt = now;
 		}
@@ -121,7 +120,7 @@ public class AsistenciaController {
 			request.attendanceDate(),
 			enrollment.get().getSchedule().getId()
 		);
-		if (isLocked(records, Instant.now())) {
+		if (isLocked(records, LocalDateTime.now())) {
 			return ResponseEntity.status(423).build();
 		}
 		var attendance = attendanceRepository
@@ -132,27 +131,27 @@ public class AsistenciaController {
 		attendance.setStatus(request.status());
 		attendance.setObservations(request.observations());
 		if (attendance.getSavedAt() == null) {
-			Instant savedAt = savedAt(records);
-			attendance.setSavedAt(savedAt == null ? Instant.now() : savedAt);
+			LocalDateTime savedAt = savedAt(records);
+			attendance.setSavedAt(savedAt == null ? LocalDateTime.now() : savedAt);
 		}
 		return ResponseEntity.ok(attendanceRepository.save(attendance));
 	}
 
-	private boolean isLocked(List<Asistencia> records, Instant now) {
-		Instant editableUntil = editableUntil(records);
+	private boolean isLocked(List<Asistencia> records, LocalDateTime now) {
+		LocalDateTime editableUntil = editableUntil(records);
 		return editableUntil != null && now.isAfter(editableUntil);
 	}
 
-	private Instant editableUntil(List<Asistencia> records) {
-		Instant savedAt = savedAt(records);
-		return savedAt == null ? null : savedAt.plusSeconds(MINUTOS_EDICION * 60L);
+	private LocalDateTime editableUntil(List<Asistencia> records) {
+		LocalDateTime savedAt = savedAt(records);
+		return savedAt == null ? null : savedAt.plusMinutes(MINUTOS_EDICION);
 	}
 
-	private Instant savedAt(List<Asistencia> records) {
+	private LocalDateTime savedAt(List<Asistencia> records) {
 		return records.stream()
 			.map(Asistencia::getSavedAt)
 			.filter(savedAt -> savedAt != null)
-			.min(Comparator.naturalOrder())
+			.min(LocalDateTime::compareTo)
 			.orElse(null);
 	}
 }
